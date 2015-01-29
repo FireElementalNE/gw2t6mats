@@ -26,7 +26,7 @@ try:
 	totem_num = sys.argv[8]
 except IndexError:
 	print 'Inputs are the number of the mat that you HAVE not that you have left.'
-	print 'Usage: %s <scales> <fangs> <claws> <blood> <dust> <bone> <venom> <totem>'
+	print 'Usage: %s <scales> <fangs> <claws> <blood> <dust> <bone> <venom> <totem>' % (sys.argv[0])
 	sys.exit(0)
 
 scales_id = '24284'
