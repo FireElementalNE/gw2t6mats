@@ -2,6 +2,10 @@ import sys
 import urllib
 import json
 
+def checkBounds(passedArg):
+	if int(passedArg) > 250 or int(passedArg) < 0:
+		return False
+	return True
 
 def priceFormat(price):
 	gold=0
@@ -15,6 +19,25 @@ def priceFormat(price):
 	copper=price
 	return '%sG %sS %sC' % (gold,silver,copper)
 
+def prettyPrint(material,matText,amount_left):
+	newTotal = 0
+	for lineItem in material['sells']:
+		newPrice = None
+		quantity = lineItem['quantity']
+		if quantity >= amount_left:
+			basePrice = lineItem['unit_price']
+			newPrice = amount_left * lineItem['unit_price']
+			newTotal += newPrice
+			print '%d %s: %s @ %s each' % (amount_left,matText,priceFormat(newPrice),priceFormat(basePrice))
+			break
+		else:
+			basePrice = lineItem['unit_price']
+			amount_left = amount_left - quantity
+			newPrice = quantity * lineItem['unit_price']
+			newTotal += newPrice
+			print '%d %s: %s @ %s each' % (quantity,matText,priceFormat(newPrice),priceFormat(basePrice))
+	return newTotal
+
 try:
 	scales_num = sys.argv[1]
 	fang_num = sys.argv[2]
@@ -24,12 +47,18 @@ try:
 	bone_num = sys.argv[6]
 	venom_num = sys.argv[7]
 	totem_num = sys.argv[8]
+	check1 = checkBounds(scales_num) and checkBounds(fang_num) and checkBounds(claw_num) and checkBounds(blood_num)
+	check2 = checkBounds(dust_num) and checkBounds(bone_num) and checkBounds(venom_num) and checkBounds(totem_num)
+	check3 = check1 and check2
+	if not check3:
+		print 'Invalid Bounds'
+		sys.exit(0)
 except IndexError:
 	print 'Inputs are the number of the mat that you HAVE not that you have left.'
 	print 'Usage: %s <scales> <fangs> <claws> <blood> <dust> <bone> <venom> <totem>' % (sys.argv[0])
 	sys.exit(0)
 
-scales_id = '24284'
+scales_id = '24289'
 fang_id = '24357'
 claw_id = '24351'
 blood_id = '24295'
@@ -55,37 +84,21 @@ totalAmount = 0
 for material in content:
 	id1 = str(material['id'])
 	if id1 == scales_id:
-		newPrice = scales_left * material['sells'][0]['unit_price']
-		totalAmount += newPrice
-		print '%d Scales: %s' % (scales_left,priceFormat(newPrice))
+		totalAmount += prettyPrint(material,"Scale: ",scales_left)
 	elif id1 == fang_id:
-		newPrice = fang_left * material['sells'][0]['unit_price']
-		totalAmount += newPrice
-		print '%d Fangs: %s' % (fang_left,priceFormat(newPrice))
+		totalAmount += prettyPrint(material,"Fangs: ",fang_left)
 	elif id1 == claw_id:
-		newPrice = claw_left * material['sells'][0]['unit_price']
-		totalAmount += newPrice
-		print '%d Claws: %s' % (claw_left,priceFormat(newPrice))
+		totalAmount += prettyPrint(material,"Claws: ",claw_left)
 	elif id1 == blood_id:
-		newPrice = scales_left * material['sells'][0]['unit_price']
-		totalAmount += newPrice
-		print '%d Blood: %s' % (blood_left,priceFormat(newPrice))
+		totalAmount += prettyPrint(material,"Blood: ",blood_left)
 	elif id1 == dust_id:
-		newPrice = scales_left * material['sells'][0]['unit_price']
-		totalAmount += newPrice
-		print '%d Dust: %s' % (dust_left,priceFormat(newPrice))
+		totalAmount += prettyPrint(material,"Dust: ",dust_left)
 	elif id1 == bone_id:
-		newPrice = scales_left * material['sells'][0]['unit_price']
-		totalAmount += newPrice
-		print '%d Bones: %s' % (bone_left,priceFormat(newPrice))
+		totalAmount += prettyPrint(material,"Bones: ",bone_left)
 	elif id1 == venom_id:
-		newPrice = venom_left * material['sells'][0]['unit_price']
-		totalAmount += newPrice
-		print '%d Venom Sacs: %s' % (venom_left,priceFormat(newPrice))
+		totalAmount += prettyPrint(material,"Venom Sacs: ",venom_left)
 	elif id1 == totem_id:
-		newPrice = totem_left * material['sells'][0]['unit_price']
-		totalAmount += newPrice
-		print '%d Totems: %s' % (totem_left,priceFormat(newPrice))
+		totalAmount += prettyPrint(material,"Totems: ",totem_left)
 	
 print '--------------------------------'
 print 'Total: %s' % (priceFormat(totalAmount))
